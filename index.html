@@ -306,12 +306,12 @@
     <div class="stat-card">
       <div class="stat-label">Total calls dialed</div>
       <div class="stat-value" id="statTotalCalls">—</div>
-      <div class="stat-hint">all dial attempts -- matches the BatchDialer dashboard</div>
+      <div class="stat-hint">all dial attempts, campaign-wide -- matches BatchDialer's dashboard. Not attributable per-ISA: BatchDialer only tags an agent once a call actually reaches a live person</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Connected calls</div>
       <div class="stat-value" id="statCalls">—</div>
-      <div class="stat-hint" id="statCallsHint">reached a live person, selected range</div>
+      <div class="stat-hint" id="statCallsHint">real human-contact outcome (excludes no-answer/voicemail/machine)</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Talk time</div>
@@ -411,7 +411,7 @@
   <footer id="generatedAt"></footer>
 </div>
 
-<script id="dashboard-data" type="application/json">{"generated_at": "2026-08-28T20:06:03.827130", "isas": {"Nick Thomas": [{"date": "2026-08-23", "calls": 26, "talk_seconds": 132, "interested": 0, "appointments_set": 0}, {"date": "2026-08-25", "calls": 27, "talk_seconds": 102, "interested": 0, "appointments_set": 0}, {"date": "2026-08-26", "calls": 31, "talk_seconds": 198, "interested": 0, "appointments_set": 0}, {"date": "2026-08-27", "calls": 6, "talk_seconds": 0, "interested": 0, "appointments_set": 0}]}, "ai_performance": {"Voice AI": [{"date": "2026-08-26", "calls": 4, "appointments_set": 2, "handovers": 1}], "Conversation AI": [{"date": "2026-08-20", "calls": 92, "appointments_set": 0, "handovers": 0}]}, "total_dial_attempts": [{"date": "2026-08-23", "calls": 466}, {"date": "2026-08-25", "calls": 1109}, {"date": "2026-08-26", "calls": 767}, {"date": "2026-08-27", "calls": 174}], "uncontacted": {"new": 6260, "legacy": 25986}}</script>
+<script id="dashboard-data" type="application/json">{"generated_at": "2026-08-28T20:32:34.358461", "isas": {"Nick Thomas": [{"date": "2026-08-23", "calls": 6, "talk_seconds": 132, "interested": 0, "appointments_set": 0}, {"date": "2026-08-25", "calls": 4, "talk_seconds": 102, "interested": 0, "appointments_set": 0}, {"date": "2026-08-26", "calls": 7, "talk_seconds": 198, "interested": 0, "appointments_set": 0}]}, "ai_performance": {"Voice AI": [{"date": "2026-08-26", "calls": 4, "appointments_set": 2, "handovers": 1}], "Conversation AI": [{"date": "2026-08-20", "calls": 92, "appointments_set": 0, "handovers": 0}]}, "total_dial_attempts": [{"date": "2026-08-23", "calls": 466}, {"date": "2026-08-25", "calls": 1109}, {"date": "2026-08-26", "calls": 767}, {"date": "2026-08-27", "calls": 174}], "uncontacted": {"new": 6260, "legacy": 25986}}</script>
 <script>
 (function() {
   const data = JSON.parse(document.getElementById('dashboard-data').textContent);
