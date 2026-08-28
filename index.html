@@ -304,9 +304,14 @@
 
   <div class="stat-grid">
     <div class="stat-card">
-      <div class="stat-label">Calls made</div>
+      <div class="stat-label">Total calls dialed</div>
+      <div class="stat-value" id="statTotalCalls">—</div>
+      <div class="stat-hint">all dial attempts -- matches the BatchDialer dashboard</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Connected calls</div>
       <div class="stat-value" id="statCalls">—</div>
-      <div class="stat-hint" id="statCallsHint">selected range, all ISAs</div>
+      <div class="stat-hint" id="statCallsHint">reached a live person, selected range</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Talk time</div>
@@ -406,15 +411,17 @@
   <footer id="generatedAt"></footer>
 </div>
 
-<script id="dashboard-data" type="application/json">{"generated_at": "2026-08-28T19:35:50.048521", "isas": {"Nick Thomas": [{"date": "2026-08-23", "calls": 26, "talk_seconds": 132, "interested": 0, "appointments_set": 0}, {"date": "2026-08-25", "calls": 27, "talk_seconds": 102, "interested": 0, "appointments_set": 0}, {"date": "2026-08-26", "calls": 31, "talk_seconds": 198, "interested": 0, "appointments_set": 0}, {"date": "2026-08-27", "calls": 6, "talk_seconds": 0, "interested": 0, "appointments_set": 0}]}, "ai_performance": {"Voice AI": [{"date": "2026-08-26", "calls": 4, "appointments_set": 2, "handovers": 1}], "Conversation AI": [{"date": "2026-08-20", "calls": 92, "appointments_set": 0, "handovers": 0}]}, "uncontacted": {"new": 6260, "legacy": 25986}}</script>
+<script id="dashboard-data" type="application/json">{"generated_at": "2026-08-28T20:06:03.827130", "isas": {"Nick Thomas": [{"date": "2026-08-23", "calls": 26, "talk_seconds": 132, "interested": 0, "appointments_set": 0}, {"date": "2026-08-25", "calls": 27, "talk_seconds": 102, "interested": 0, "appointments_set": 0}, {"date": "2026-08-26", "calls": 31, "talk_seconds": 198, "interested": 0, "appointments_set": 0}, {"date": "2026-08-27", "calls": 6, "talk_seconds": 0, "interested": 0, "appointments_set": 0}]}, "ai_performance": {"Voice AI": [{"date": "2026-08-26", "calls": 4, "appointments_set": 2, "handovers": 1}], "Conversation AI": [{"date": "2026-08-20", "calls": 92, "appointments_set": 0, "handovers": 0}]}, "total_dial_attempts": [{"date": "2026-08-23", "calls": 466}, {"date": "2026-08-25", "calls": 1109}, {"date": "2026-08-26", "calls": 767}, {"date": "2026-08-27", "calls": 174}], "uncontacted": {"new": 6260, "legacy": 25986}}</script>
 <script>
 (function() {
   const data = JSON.parse(document.getElementById('dashboard-data').textContent);
   const isas = data.isas || {};
   const aiPerformance = data.ai_performance || {};
+  const totalDialAttempts = data.total_dial_attempts || [];
   const allDates = new Set();
   Object.values(isas).forEach(rows => rows.forEach(r => allDates.add(r.date)));
   Object.values(aiPerformance).forEach(rows => rows.forEach(r => allDates.add(r.date)));
+  totalDialAttempts.forEach(r => allDates.add(r.date));
   const sortedDates = Array.from(allDates).sort();
   const minDate = sortedDates[0] || new Date().toISOString().slice(0, 10);
   const maxDate = sortedDates[sortedDates.length - 1] || new Date().toISOString().slice(0, 10);
@@ -477,6 +484,10 @@
       });
     });
 
+    const totalDialed = totalDialAttempts
+      .filter(r => r.date >= from && r.date <= to)
+      .reduce((s, r) => s + r.calls, 0);
+    document.getElementById('statTotalCalls').textContent = totalDialed.toLocaleString();
     document.getElementById('statCalls').textContent = totalCalls.toLocaleString();
     document.getElementById('statTalk').textContent = fmtTalk(totalTalk);
     document.getElementById('statInterested').textContent = totalInterested.toLocaleString();
