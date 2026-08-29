@@ -392,6 +392,25 @@
   </section>
 
   <section class="block">
+    <h2>Agent calling time</h2>
+    <p class="block-sub">From BatchDialer's own agent report — cumulative totals, not affected by the date range above</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Agent</th>
+          <th>Calling time</th>
+          <th>Available</th>
+          <th>On call</th>
+          <th>After call</th>
+          <th>Calls answered</th>
+        </tr>
+      </thead>
+      <tbody id="presenceTableBody"></tbody>
+    </table>
+    <div class="empty-note" id="presenceEmptyNote" style="display:none">Agent calling-time data isn't available right now.</div>
+  </section>
+
+  <section class="block">
     <h2>Uncontacted leads</h2>
     <p class="block-sub">Leads sitting in GHL with zero calls made — not affected by the date range above</p>
     <div class="uncontacted-grid">
@@ -411,7 +430,7 @@
   <footer id="generatedAt"></footer>
 </div>
 
-<script id="dashboard-data" type="application/json">{"generated_at": "2026-08-28T20:32:34.358461", "isas": {"Nick Thomas": [{"date": "2026-08-23", "calls": 6, "talk_seconds": 132, "interested": 0, "appointments_set": 0}, {"date": "2026-08-25", "calls": 4, "talk_seconds": 102, "interested": 0, "appointments_set": 0}, {"date": "2026-08-26", "calls": 7, "talk_seconds": 198, "interested": 0, "appointments_set": 0}]}, "ai_performance": {"Voice AI": [{"date": "2026-08-26", "calls": 4, "appointments_set": 2, "handovers": 1}], "Conversation AI": [{"date": "2026-08-20", "calls": 92, "appointments_set": 0, "handovers": 0}]}, "total_dial_attempts": [{"date": "2026-08-23", "calls": 466}, {"date": "2026-08-25", "calls": 1109}, {"date": "2026-08-26", "calls": 767}, {"date": "2026-08-27", "calls": 174}], "uncontacted": {"new": 6260, "legacy": 25986}}</script>
+<script id="dashboard-data" type="application/json">{"generated_at": "2026-08-29T07:09:39.327812", "isas": {"Nick Thomas": [{"date": "2026-08-23", "calls": 6, "talk_seconds": 132, "interested": 0, "appointments_set": 0}, {"date": "2026-08-25", "calls": 4, "talk_seconds": 102, "interested": 0, "appointments_set": 0}, {"date": "2026-08-26", "calls": 7, "talk_seconds": 198, "interested": 0, "appointments_set": 0}, {"date": "2026-08-28", "calls": 9, "talk_seconds": 252, "interested": 0, "appointments_set": 0}]}, "ai_performance": {"Voice AI": [{"date": "2026-08-26", "calls": 4, "appointments_set": 2, "handovers": 1}], "Conversation AI": [{"date": "2026-08-20", "calls": 92, "appointments_set": 0, "handovers": 0}]}, "total_dial_attempts": [{"date": "2026-08-23", "calls": 466}, {"date": "2026-08-25", "calls": 1109}, {"date": "2026-08-26", "calls": 767}, {"date": "2026-08-27", "calls": 174}, {"date": "2026-08-28", "calls": 720}], "agent_presence": [{"agent_id": 116514, "name": "Nick Thomas", "answered": 125, "calls_total": 126, "presence_seconds": {"Available": 68874, "On Call": 5861, "Disconnected": 1025521, "Offline": 425501, "Break": 2959, "In Meeting": 1679, "PrepWork": 271630, "After Call": 55540, "Lunch": 19, "Out of desk": 9}, "calling_time_seconds": 130275}, {"agent_id": 116958, "name": "Graham Parker", "answered": 0, "calls_total": 0, "presence_seconds": {"Disconnected": 31148, "Offline": 74, "PrepWork": 6071}, "calling_time_seconds": 0}], "uncontacted": {"new": 3070, "legacy": 28709}}</script>
 <script>
 (function() {
   const data = JSON.parse(document.getElementById('dashboard-data').textContent);
@@ -595,6 +614,27 @@
 
   fromInput.addEventListener('change', render);
   toInput.addEventListener('change', render);
+
+  const presenceBody = document.getElementById('presenceTableBody');
+  const presenceEmpty = document.getElementById('presenceEmptyNote');
+  const agentPresence = data.agent_presence || null;
+  if (!agentPresence || agentPresence.length === 0) {
+    presenceEmpty.style.display = 'block';
+  } else {
+    presenceEmpty.style.display = 'none';
+    agentPresence.forEach(a => {
+      const p = a.presence_seconds || {};
+      const tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td class="name">' + a.name + '</td>' +
+        '<td>' + fmtTalk(a.calling_time_seconds || 0) + '</td>' +
+        '<td>' + fmtTalk(p['Available'] || 0) + '</td>' +
+        '<td>' + fmtTalk(p['On Call'] || 0) + '</td>' +
+        '<td>' + fmtTalk(p['After Call'] || 0) + '</td>' +
+        '<td>' + (a.answered || 0).toLocaleString() + '</td>';
+      presenceBody.appendChild(tr);
+    });
+  }
 
   document.getElementById('uncNew').textContent = (data.uncontacted?.new || 0).toLocaleString();
   document.getElementById('uncLegacy').textContent = (data.uncontacted?.legacy || 0).toLocaleString();
