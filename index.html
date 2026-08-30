@@ -430,7 +430,7 @@
   <footer id="generatedAt"></footer>
 </div>
 
-<script id="dashboard-data" type="application/json">{"generated_at": "2026-08-30T10:26:02.407207", "isas": {"Nick Thomas": [{"date": "2026-08-23", "calls": 6, "talk_seconds": 132, "interested": 0, "appointments_set": 0}, {"date": "2026-08-25", "calls": 4, "talk_seconds": 102, "interested": 0, "appointments_set": 0}, {"date": "2026-08-26", "calls": 7, "talk_seconds": 198, "interested": 0, "appointments_set": 0}, {"date": "2026-08-28", "calls": 9, "talk_seconds": 252, "interested": 0, "appointments_set": 0}]}, "ai_performance": {"Voice AI": [{"date": "2026-08-26", "calls": 4, "appointments_set": 2, "handovers": 1}], "Conversation AI": [{"date": "2026-08-20", "calls": 92, "appointments_set": 0, "handovers": 0}]}, "total_dial_attempts": [{"date": "2026-08-23", "calls": 466}, {"date": "2026-08-25", "calls": 1109}, {"date": "2026-08-26", "calls": 767}, {"date": "2026-08-27", "calls": 174}, {"date": "2026-08-28", "calls": 721}], "agent_presence": null, "batchdialer_connected_calls": null, "uncontacted": {"new": 13340, "legacy": 27586}}</script>
+<script id="dashboard-data" type="application/json">{"generated_at": "2026-08-30T10:37:15.694728", "isas": {"Nick Thomas": [{"date": "2026-08-23", "calls": 26, "talk_seconds": 666, "interested": 0, "appointments_set": 0}, {"date": "2026-08-25", "calls": 26, "talk_seconds": 1242, "interested": 0, "appointments_set": 0}, {"date": "2026-08-26", "calls": 31, "talk_seconds": 636, "interested": 0, "appointments_set": 0}, {"date": "2026-08-27", "calls": 5, "talk_seconds": 48, "interested": 0, "appointments_set": 0}, {"date": "2026-08-28", "calls": 34, "talk_seconds": 3552, "interested": 0, "appointments_set": 0}]}, "ai_performance": {"Voice AI": [{"date": "2026-08-26", "calls": 4, "appointments_set": 2, "handovers": 1}], "Conversation AI": [{"date": "2026-08-20", "calls": 92, "appointments_set": 0, "handovers": 0}]}, "total_dial_attempts": [{"date": "2026-08-23", "calls": 466}, {"date": "2026-08-25", "calls": 1109}, {"date": "2026-08-26", "calls": 767}, {"date": "2026-08-27", "calls": 174}, {"date": "2026-08-28", "calls": 721}], "agent_presence": null, "batchdialer_connected_calls": null, "local_connected_calls": [{"date": "2026-08-23", "calls": 26}, {"date": "2026-08-25", "calls": 26}, {"date": "2026-08-26", "calls": 31}, {"date": "2026-08-27", "calls": 5}, {"date": "2026-08-28", "calls": 34}], "uncontacted": {"new": 13340, "legacy": 27586}}</script>
 <script>
 (function() {
   const data = JSON.parse(document.getElementById('dashboard-data').textContent);
@@ -438,11 +438,13 @@
   const aiPerformance = data.ai_performance || {};
   const totalDialAttempts = data.total_dial_attempts || [];
   const batchdialerConnectedCalls = data.batchdialer_connected_calls || null;
+  const localConnectedCalls = data.local_connected_calls || [];
   const allDates = new Set();
   Object.values(isas).forEach(rows => rows.forEach(r => allDates.add(r.date)));
   Object.values(aiPerformance).forEach(rows => rows.forEach(r => allDates.add(r.date)));
   totalDialAttempts.forEach(r => allDates.add(r.date));
   if (batchdialerConnectedCalls) batchdialerConnectedCalls.forEach(r => allDates.add(r.date));
+  localConnectedCalls.forEach(r => allDates.add(r.date));
   const sortedDates = Array.from(allDates).sort();
   const minDate = sortedDates[0] || new Date().toISOString().slice(0, 10);
   const maxDate = sortedDates[sortedDates.length - 1] || new Date().toISOString().slice(0, 10);
@@ -524,8 +526,17 @@
       document.getElementById('statCalls').textContent = bdConnected.toLocaleString();
       statCallsHint.textContent = "straight from BatchDialer's own Connected Calls count -- matches their dashboard";
     } else {
-      document.getElementById('statCalls').textContent = totalCalls.toLocaleString();
-      statCallsHint.textContent = 'real human-contact outcome (excludes no-answer/voicemail/machine) -- BatchDialer\'s live count unavailable right now, showing our own tally';
+      // Duration-based local tally (duration_seconds > 0, site-wide, not
+      // agent-attribution-limited) -- confirmed live 08/30/26 this matches
+      // BatchDialer's own displayed "Connected Calls" number exactly (123
+      // for 123), unlike the old agent-attributed totalCalls sum which
+      // undercounted by excluding real connects with an "Unknown"
+      // disposition (one was a real 49.5-minute call).
+      const localConnected = localConnectedCalls
+        .filter(r => r.date >= from && r.date <= to)
+        .reduce((s, r) => s + r.calls, 0);
+      document.getElementById('statCalls').textContent = localConnected.toLocaleString();
+      statCallsHint.textContent = 'real human-contact outcome (duration > 0) -- BatchDialer\'s live count unavailable right now, showing our own duration-based tally';
     }
     document.getElementById('statTalk').textContent = fmtTalk(totalTalk);
     document.getElementById('statInterested').textContent = totalInterested.toLocaleString();
